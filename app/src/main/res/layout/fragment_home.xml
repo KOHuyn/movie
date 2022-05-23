@@ -5,37 +5,25 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/labelHome"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/home"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rcvPoster"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingVertical="16dp"
+        tools:itemCount="5"
+        tools:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        tools:listitem="@layout/item_movie_poster"
+        tools:spanCount="2" />
+
+    <androidx.core.widget.ContentLoadingProgressBar
+        android:id="@+id/loadingProgress"
+        style="@style/Widget.AppCompat.ProgressBar"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:indeterminateTint="@color/secondary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/tvCounter"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="-"
-        android:textSize="30sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="@id/labelHome"
-        app:layout_constraintStart_toStartOf="@id/labelHome"
-        app:layout_constraintTop_toBottomOf="@id/labelHome"
-        tools:ignore="HardcodedText" />
-
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btnStartCounter"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Start counter"
-        app:layout_constraintEnd_toEndOf="@id/tvCounter"
-        app:layout_constraintStart_toStartOf="@id/tvCounter"
-        app:layout_constraintTop_toBottomOf="@id/tvCounter" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="4dp">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cvPoster"
+        android:layout_width="fill_parent"
+        android:layout_height="200dp"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/ivPoster"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/secondary" />
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cvRatePercent"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:padding="5dp"
+        app:cardBackgroundColor="@color/primary"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="0dp"
+        app:layout_constraintBottom_toBottomOf="@id/cvPoster"
+        app:layout_constraintEnd_toEndOf="@id/cvPoster"
+        app:layout_constraintHorizontal_bias="0.1"
+        app:layout_constraintStart_toStartOf="@id/cvPoster"
+        app:layout_constraintTop_toBottomOf="@id/cvPoster">
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/progressRatePercent"
+            style="@style/Widget.Material3.CircularProgressIndicator.Medium"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:progress="40"
+            app:indicatorColor="@color/secondary"
+            app:trackColor="@color/tertiary"
+            app:trackCornerRadius="5dp"
+            app:trackThickness="3dp" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvRatePercent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            tools:text="40%" />
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvTitlePoster"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="3"
+        android:padding="8dp"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/cvRatePercent"
+        tools:text="How to Move On in 30 Days" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvDatePoster"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="3"
+        android:paddingHorizontal="8dp"
+        android:textColor="@color/black"
+        app:layout_constraintTop_toBottomOf="@id/tvTitlePoster"
+        tools:text="Sep 13, 1997" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

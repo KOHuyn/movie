@@ -4,20 +4,22 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.GridLayoutManager
 import com.kohuyn.movie.databinding.FragmentHomeBinding
-import kotlinx.coroutines.delay
+import com.kohuyn.movie.ui.home.adapter.PosterAdapter
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class HomeFragment : Fragment() {
     private lateinit var binding: FragmentHomeBinding
     private val vm by viewModels<HomeViewModel>()
+    private val adapter by lazy { PosterAdapter() }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -29,26 +31,40 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.btnStartCounter.setOnClickListener {
-            vm.startOrStopCounter()
-        }
+        setupRcv()
+        observeViewModel()
+        vm.loadPosters()
+    }
+
+    private fun observeViewModel() {
         lifecycleScope.launch {
-            vm.counter.flowWithLifecycle(lifecycle).collect {
-                binding.tvCounter.text = it.toString()
-            }
-        }
-        lifecycleScope.launch {
-            vm.startCounter.flowWithLifecycle(lifecycle).collect { isStart ->
-                binding.btnStartCounter.text = if (isStart) "Stop counter" else "Start counter"
-            }
-        }
-        lifecycleScope.launchWhenResumed {
-            vm.startCounter.flowWithLifecycle(lifecycle, minActiveState = Lifecycle.State.RESUMED).collectLatest { isStart ->
-                while (isStart) {
-                    delay(100)
-                    vm.plusCounter()
+            vm.posters
+                .flowWithLifecycle(lifecycle)
+                .collect { posters ->
+                    adapter.items = posters
                 }
-            }
+        }
+        lifecycleScope.launch {
+            vm.loading
+                .flowWithLifecycle(lifecycle)
+                .collect { isLoading ->
+                    setLoading(isLoading)
+                }
+        }
+    }
+
+    private fun setupRcv() {
+        binding.rcvPoster.adapter = adapter
+        binding.rcvPoster.layoutManager = GridLayoutManager(context, 3)
+        binding.rcvPoster.setHasFixedSize(true)
+    }
+
+    private fun setLoading(isLoading: Boolean) {
+        binding.rcvPoster.isGone = isLoading
+        if (isLoading) {
+            binding.loadingProgress.show()
+        } else {
+            binding.loadingProgress.hide()
         }
     }
 }
