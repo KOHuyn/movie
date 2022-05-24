@@ -41,10 +41,10 @@ class FavouriteViewModel : ViewModel() {
                 originalTitle = "How to Move On in 30 Days",
                 originalLanguage = "English",
                 backdropPath = "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/2cLWJiDOZvhoIaX2r2Zb78K66JQ.jpg",
-                popularity = 1,
+                popularity = 1.0,
                 voteCount = 1,
                 video = false,
-                voteAverage = 1
+                votePercent = 10
             )
         }
     }
