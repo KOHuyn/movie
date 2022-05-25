@@ -6,4 +6,9 @@
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
     <string name="retry">Retry</string>
+    <string name="login">Login</string>
+    <string name="user_name">User name</string>
+    <string name="password">Password</string>
+    <string name="or">or</string>
+    <string name="register"><u>Register</u></string>
 </resources>

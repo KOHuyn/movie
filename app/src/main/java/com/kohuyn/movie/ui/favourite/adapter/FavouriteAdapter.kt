@@ -43,9 +43,8 @@ class FavouriteAdapter : ListAdapter<Poster, FavouriteAdapter.FavouriteVH>(DIFF_
                 onRemoveItemListener(item.id)
             }
             binding.tvDescribe.text = item.overview
-            //todo fake
-            binding.progressRatePercent.progress = 10
-            binding.tvRatePercent.text = "10%"
+            binding.progressRatePercent.progress = item.votePercent
+            binding.tvRatePercent.text = "${item.votePercent}%"
         }
     }
 

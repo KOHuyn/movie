@@ -16,6 +16,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import com.kohuyn.movie.R
 import com.kohuyn.movie.databinding.DialogMessageBinding
+import com.kohuyn.movie.utils.createDialog
 
 class MessageDialog private constructor() : DialogFragment() {
     private lateinit var binding: DialogMessageBinding
@@ -29,23 +30,7 @@ class MessageDialog private constructor() : DialogFragment() {
     private var onDismissListener: (() -> Unit)? = null
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val root = RelativeLayout(activity)
-        root.layoutParams =
-            ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
-        val dialog = Dialog(activity as FragmentActivity)
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-        dialog.setContentView(root)
-        dialog.window?.apply {
-            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-            setLayout(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
-        }
-        return dialog
+        return activity.createDialog()
     }
 
     override fun onCreateView(

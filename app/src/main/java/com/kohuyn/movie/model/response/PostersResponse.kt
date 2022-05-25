@@ -2,15 +2,15 @@ package com.kohuyn.movie.model.response
 
 import com.google.gson.annotations.SerializedName
 
-data class DiscoverResponse(
+data class PostersResponse(
     val page: Int,
-    val results: List<ItemDiscoverResponse>,
+    val results: List<ItemPosterResponse>,
     @SerializedName("total_pages")
     val totalPages: Long,
     @SerializedName("total_results")
     val totalResults: Long
 ) {
-    data class ItemDiscoverResponse(
+    data class ItemPosterResponse(
         @SerializedName("adult")
         val adult: Boolean? = null,
         @SerializedName("backdrop_path")

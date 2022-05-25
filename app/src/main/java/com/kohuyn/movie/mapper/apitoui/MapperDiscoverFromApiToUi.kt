@@ -2,11 +2,11 @@ package com.kohuyn.movie.mapper.apitoui
 
 import com.kohuyn.movie.mapper.base.Mapper
 import com.kohuyn.movie.model.Poster
-import com.kohuyn.movie.model.response.DiscoverResponse
+import com.kohuyn.movie.model.response.PostersResponse
 import com.kohuyn.movie.utils.MovieImageLoader
 
-object MapperDiscoverFromApiToUi : Mapper<DiscoverResponse.ItemDiscoverResponse, Poster> {
-    override fun mapperFrom(from: DiscoverResponse.ItemDiscoverResponse): Poster {
+object MapperDiscoverFromApiToUi : Mapper<PostersResponse.ItemPosterResponse, Poster> {
+    override fun mapperFrom(from: PostersResponse.ItemPosterResponse): Poster {
         return Poster(
             id = from.id ?: -1,
             title = from.title ?: "-",
