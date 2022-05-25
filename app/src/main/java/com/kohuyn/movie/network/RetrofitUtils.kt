@@ -36,23 +36,4 @@ object RetrofitUtils {
             .connectTimeout(Configs.HTTP_TIMEOUT, TimeUnit.MILLISECONDS)
             .build()
     }
-
-    fun <T> checkSuccess(
-        response: Response<T>,
-        onError: (StatusResponse) -> Unit
-    ): Boolean {
-        if (response.isSuccessful) {
-            return true
-        }
-        val responseBody: ResponseBody = response.errorBody() ?: kotlin.run {
-            onError(StatusResponse(-1, "Unknown error"))
-            return false
-        }
-        val status = retrofit.responseBodyConverter<StatusResponse>(
-            StatusResponse::class.java,
-            StatusResponse::class.java.annotations
-        ).convert(responseBody) as StatusResponse
-        onError(status)
-        return false
-    }
 }

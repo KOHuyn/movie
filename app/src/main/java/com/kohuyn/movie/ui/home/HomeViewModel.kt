@@ -2,13 +2,15 @@ package com.kohuyn.movie.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kohuyn.movie.exception.MovieException
+import com.google.gson.Gson
+import com.google.gson.JsonParseException
 import com.kohuyn.movie.mapper.apitoui.MapperDiscoverFromApiToUi
 import com.kohuyn.movie.model.Poster
+import com.kohuyn.movie.model.response.StatusResponse
 import com.kohuyn.movie.network.RetrofitUtils
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import timber.log.Timber
+import retrofit2.HttpException
 
 
 class HomeViewModel : ViewModel() {
@@ -28,21 +30,12 @@ class HomeViewModel : ViewModel() {
             }
                 .onStart { _loading.update { true } }
                 .onCompletion { _loading.update { false } }
-                .filter {
-                    RetrofitUtils.checkSuccess(it) { status ->
-                        throw MovieException(status.statusCode, status.statusMessage)
-                    }
-                }
-                .map { it.body() }
-                .filterNotNull()
                 .catch { e ->
-                    if (e is MovieException) {
-                        //todo
-                    } else {
-                        //todo
-                    }
+                    val statusResponse = getApiError(e)
                     _messages.update { messages ->
-                        messages.toMutableList().apply { add(e.message ?: "-") }
+                        messages.toMutableList().apply {
+                            add(statusResponse.statusMessage)
+                        }
                     }
                 }
                 .collect { posters ->
@@ -52,6 +45,18 @@ class HomeViewModel : ViewModel() {
                         }
                     }
                 }
+        }
+    }
+
+    private fun getApiError(e: Throwable): StatusResponse {
+        return if (e is HttpException) {
+            try {
+                Gson().fromJson(e.response()?.errorBody()?.string(), StatusResponse::class.java)
+            } catch (e: JsonParseException) {
+                StatusResponse(-1, "Json Parser Exception")
+            }
+        } else {
+            StatusResponse(-1, e.message ?: "Unknown message")
         }
     }
 

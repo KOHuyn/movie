@@ -12,7 +12,9 @@ import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.snackbar.Snackbar
+import com.kohuyn.movie.R
 import com.kohuyn.movie.databinding.FragmentHomeBinding
+import com.kohuyn.movie.ui.alert.MessageDialog
 import com.kohuyn.movie.ui.home.adapter.PosterAdapter
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -59,8 +61,16 @@ class HomeFragment : Fragment() {
                 .collect { messages ->
                     if (messages.isNotEmpty()) {
                         val messageShow = messages.first()
-                        Snackbar.make(binding.root, messageShow, Snackbar.LENGTH_SHORT).show()
-                        vm.setMessageShown(messageShow)
+                        MessageDialog.Builder()
+                            .setMessage(messageShow)
+                            .setButtonNegative { dialog -> dialog.dismiss() }
+                            .setButtonPositive(getString(R.string.retry)) { dialog ->
+                                dialog.dismiss()
+                                vm.loadPosters()
+                            }
+                            .setOnDismissListener { vm.setMessageShown(messageShow) }
+                            .setCancelable(false)
+                            .build(childFragmentManager)
                     }
                 }
         }
