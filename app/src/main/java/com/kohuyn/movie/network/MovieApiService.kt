@@ -1,10 +1,7 @@
 package com.kohuyn.movie.network
 
 import com.google.gson.JsonObject
-import com.kohuyn.movie.model.response.AccountDetailResponse
-import com.kohuyn.movie.model.response.CreateSessionResponse
-import com.kohuyn.movie.model.response.PostersResponse
-import com.kohuyn.movie.model.response.TokenResponse
+import com.kohuyn.movie.model.response.*
 import com.kohuyn.movie.utils.StorageCache
 import retrofit2.http.*
 
@@ -36,4 +33,10 @@ interface MovieApiService {
         @Query("session_id") sessionId: String? = StorageCache.sessionId,
         @Body body: JsonObject
     )
+
+    @GET("movie/{movie_id}")
+    suspend fun getMovieDetail(@Path("movie_id") movieId: Int): MovieDetailResponse
+
+    @GET("movie/{movie_id}/recommendations")
+    suspend fun getMovieRecommendations(@Path("movie_id") movieId: Int): PostersResponse
 }

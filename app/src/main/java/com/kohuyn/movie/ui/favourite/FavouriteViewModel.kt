@@ -3,7 +3,7 @@ package com.kohuyn.movie.ui.favourite
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.JsonObject
-import com.kohuyn.movie.mapper.apitoui.MapperDiscoverFromApiToUi
+import com.kohuyn.movie.mapper.apitoui.MapperMovieFromApiToUi
 import com.kohuyn.movie.model.Poster
 import com.kohuyn.movie.network.RetrofitUtils
 import com.kohuyn.movie.utils.UiMessage
@@ -36,7 +36,7 @@ class FavouriteViewModel : ViewModel() {
                 .collect { posters ->
                     _posters.update {
                         posters.results.map {
-                            MapperDiscoverFromApiToUi.mapperFrom(it)
+                            MapperMovieFromApiToUi.mapperFrom(it)
                         }
                     }
                 }

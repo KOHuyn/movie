@@ -5,12 +5,12 @@ import com.kohuyn.movie.model.Poster
 import com.kohuyn.movie.model.response.PostersResponse
 import com.kohuyn.movie.utils.MovieImageLoader
 
-object MapperDiscoverFromApiToUi : Mapper<PostersResponse.ItemPosterResponse, Poster> {
+object MapperMovieFromApiToUi : Mapper<PostersResponse.ItemPosterResponse, Poster> {
     override fun mapperFrom(from: PostersResponse.ItemPosterResponse): Poster {
         return Poster(
             id = from.id ?: -1,
             title = from.title ?: "-",
-            posterPath = MovieImageLoader.load(from.posterPath),
+            posterPath = MovieImageLoader.loadPoster(from.posterPath),
             releaseDate = from.releaseDate,
             adult = from.adult,
             overview = from.overview,

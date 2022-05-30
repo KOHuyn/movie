@@ -2,7 +2,7 @@ package com.kohuyn.movie.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kohuyn.movie.mapper.apitoui.MapperDiscoverFromApiToUi
+import com.kohuyn.movie.mapper.apitoui.MapperMovieFromApiToUi
 import com.kohuyn.movie.model.Poster
 import com.kohuyn.movie.network.RetrofitUtils
 import com.kohuyn.movie.utils.UiMessage
@@ -35,7 +35,7 @@ class HomeViewModel : ViewModel() {
                 .collect { posters ->
                     _posters.update {
                         posters.results.map {
-                            MapperDiscoverFromApiToUi.mapperFrom(it)
+                            MapperMovieFromApiToUi.mapperFrom(it)
                         }
                     }
                 }

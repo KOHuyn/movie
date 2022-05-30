@@ -9,4 +9,9 @@
         android:name="com.kohuyn.movie.ui.main.MainFragment"
         android:label="Dash board"
         tools:layout="@layout/fragment_main" />
+    <fragment
+        android:id="@+id/fragment_movie_detail"
+        android:name="com.kohuyn.movie.ui.movie.detail.MovieDetailFragment"
+        android:label="Movie Detail"
+        tools:layout="@layout/fragment_movie_detail" />
 </navigation>
