@@ -13,7 +13,8 @@ data class Poster(
     val popularity: Double,
     val voteCount: Int,
     val video: Boolean,
-    val votePercent: Int
+    val votePercent: Int,
+    var isLoading: Boolean = false
 ) {
     companion object {
         fun mockData(id: Int = -1): Poster {

@@ -8,6 +8,8 @@ import com.kohuyn.movie.model.response.CreateSessionResponse
 import com.kohuyn.movie.model.response.TokenResponse
 import com.kohuyn.movie.network.RetrofitUtils
 import com.kohuyn.movie.utils.StorageCache
+import com.kohuyn.movie.utils.UiMessage
+import com.kohuyn.movie.utils.addMessage
 import com.kohuyn.movie.utils.getApiError
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
@@ -17,8 +19,8 @@ class LoginViewModel : ViewModel() {
     private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> get() = _isLoading
 
-    private val _messages: MutableStateFlow<List<String>> = MutableStateFlow(listOf())
-    val messages: StateFlow<List<String>> get() = _messages
+    private val _messages: MutableStateFlow<List<UiMessage>> = MutableStateFlow(listOf())
+    val messages: StateFlow<List<UiMessage>> get() = _messages
 
     var onLoginSuccess: () -> Unit = {}
 
@@ -100,11 +102,7 @@ class LoginViewModel : ViewModel() {
                 .onCompletion { _isLoading.update { false } }
                 .catch { e ->
                     val statusResponse = getApiError(e)
-                    _messages.update { messages ->
-                        messages.toMutableList().apply {
-                            add(statusResponse.statusMessage)
-                        }
-                    }
+                    _messages.addMessage(statusResponse.statusMessage)
                 }
                 .collect {
                     onLoginSuccess()
@@ -114,7 +112,7 @@ class LoginViewModel : ViewModel() {
 
     fun setMessageShown(message: String) {
         _messages.update { messages ->
-            messages.filterNot { it == message }
+            messages.filterNot { it.message == message }
         }
     }
 }

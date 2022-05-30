@@ -27,12 +27,13 @@ interface MovieApiService {
     @GET("account/{account_id}/favorite/movies")
     suspend fun getFavoritesMovie(
         @Path("account_id") accountId: Int = StorageCache.accountId ?: -1,
-        @Query("session_id") sessionId: String = StorageCache.sessionId ?: ""
+        @Query("session_id") sessionId: String? = StorageCache.sessionId
     ): PostersResponse
 
     @POST("account/{account_id}/favorite")
     suspend fun favorite(
         @Path("account_id") accountId: Int = StorageCache.accountId ?: -1,
+        @Query("session_id") sessionId: String? = StorageCache.sessionId,
         @Body body: JsonObject
     )
 }

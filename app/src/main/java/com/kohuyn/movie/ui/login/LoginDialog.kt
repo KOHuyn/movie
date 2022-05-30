@@ -100,9 +100,9 @@ class LoginDialog : DialogFragment() {
                     if (messages.isNotEmpty()) {
                         val messageShow = messages.first()
                         MessageDialog.Builder()
-                            .setMessage(messageShow)
+                            .setMessage(messageShow.message)
                             .setButtonNegative { dialog -> dialog.dismiss() }
-                            .setOnDismissListener { vm.setMessageShown(messageShow) }
+                            .setOnDismissListener { vm.setMessageShown(messageShow.message) }
                             .setCancelable(false)
                             .build(childFragmentManager)
                     }

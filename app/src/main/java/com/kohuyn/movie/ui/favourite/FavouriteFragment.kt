@@ -73,11 +73,11 @@ class FavouriteFragment : Fragment() {
                     if (messages.isNotEmpty()) {
                         val messageShow = messages.first()
                         MessageDialog.Builder()
-                            .setMessage(messageShow)
+                            .setMessage(messageShow.message)
                             .setButtonPositive { dialog ->
                                 dialog.dismiss()
                             }
-                            .setOnDismissListener { vm.setMessageShown(messageShow) }
+                            .setOnDismissListener { vm.setMessageShown(messageShow.message) }
                             .setCancelable(false)
                             .build(childFragmentManager)
                     }

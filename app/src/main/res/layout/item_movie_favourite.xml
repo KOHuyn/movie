@@ -117,4 +117,17 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@id/cvPoster"
         app:layout_constraintTop_toBottomOf="@id/tvDescribe" />
+
+    <ProgressBar
+        android:id="@+id/progressLoading"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:elevation="5dp"
+        android:indeterminateTint="@color/primary"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/btnRemove"
+        app:layout_constraintEnd_toEndOf="@id/btnRemove"
+        app:layout_constraintStart_toStartOf="@id/btnRemove"
+        app:layout_constraintTop_toTopOf="@id/btnRemove"
+        tools:visibility="visible" />
 </androidx.constraintlayout.widget.ConstraintLayout>
