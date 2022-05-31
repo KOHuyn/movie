@@ -39,4 +39,7 @@ interface MovieApiService {
 
     @GET("movie/{movie_id}/recommendations")
     suspend fun getMovieRecommendations(@Path("movie_id") movieId: Int): PostersResponse
+
+    @GET("movie/{movie_id}/casts")
+    suspend fun getSeriesCastMovie(@Path("movie_id") movieId: Int): SeriesCastResponse
 }

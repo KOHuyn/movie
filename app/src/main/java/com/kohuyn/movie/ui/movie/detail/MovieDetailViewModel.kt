@@ -5,9 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.google.gson.JsonObject
 import com.kohuyn.movie.mapper.apitoui.MapperMovieDetailFromApiToUi
 import com.kohuyn.movie.mapper.apitoui.MapperMovieRecommendationFromSocketToUi
+import com.kohuyn.movie.mapper.apitoui.MapperSeriesCastFromSocketToUi
 import com.kohuyn.movie.model.MovieDetail
 import com.kohuyn.movie.model.response.MovieDetailResponse
 import com.kohuyn.movie.model.response.PostersResponse
+import com.kohuyn.movie.model.response.SeriesCastResponse
 import com.kohuyn.movie.network.RetrofitUtils
 import com.kohuyn.movie.utils.UiMessage
 import com.kohuyn.movie.utils.addMessage
@@ -23,6 +25,9 @@ class MovieDetailViewModel : ViewModel() {
     val loading: StateFlow<Boolean> get() = _loading
     private val _loadingMovieRecommendation: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val loadingMovieRecommendation: StateFlow<Boolean> get() = _loading
+
+    private val _loadingSeriesCast: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val loadingSeriesCast: StateFlow<Boolean> get() = _loadingSeriesCast
 
     private val _messages: MutableStateFlow<List<UiMessage>> = MutableStateFlow(listOf())
     val messages: StateFlow<List<UiMessage>> get() = _messages
@@ -42,16 +47,28 @@ class MovieDetailViewModel : ViewModel() {
             .onCompletion { _loadingMovieRecommendation.update { false } }
     }
 
+    private fun getSeriesCastResponse(movieId: Int): Flow<SeriesCastResponse> {
+        return flow { emit(RetrofitUtils.apiService.getSeriesCastMovie(movieId)) }
+            .onStart { _loadingSeriesCast.update { true } }
+            .onCompletion { _loadingSeriesCast.update { false } }
+    }
+
     fun getMovie(movieId: Int) {
         viewModelScope.launch {
             combine(
                 getMovieDetailResponse(movieId),
-                getMovieRecommendationResponse(movieId)
-            ) { movieDetail, movieRecommendation ->
+                getMovieRecommendationResponse(movieId),
+                getSeriesCastResponse(movieId)
+            ) { movieDetail, movieRecommendation, seriesCast ->
                 val movieRecommendationList = movieRecommendation.results.map {
                     MapperMovieRecommendationFromSocketToUi.mapperFrom(it)
                 }
-                MapperMovieDetailFromApiToUi.mapperFrom(movieDetail, movieRecommendationList)
+                val seriesCastList = MapperSeriesCastFromSocketToUi.mapperFrom(seriesCast)
+                MapperMovieDetailFromApiToUi.mapperFrom(
+                    movieDetail,
+                    movieRecommendationList,
+                    seriesCastList
+                )
             }
                 .catch { e ->
                     val statusResponse = getApiError(e)

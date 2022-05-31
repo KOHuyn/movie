@@ -1,6 +1,7 @@
 package com.kohuyn.movie.mapper.apitoui
 
-import com.kohuyn.movie.mapper.base.MapperBoth
+import com.kohuyn.movie.mapper.base.MapperTriple
+import com.kohuyn.movie.model.Cast
 import com.kohuyn.movie.model.MovieDetail
 import com.kohuyn.movie.model.MovieRecommendPreview
 import com.kohuyn.movie.model.response.MovieDetailResponse
@@ -8,10 +9,11 @@ import com.kohuyn.movie.utils.DateTimeFormatter
 import com.kohuyn.movie.utils.MovieImageLoader
 
 object MapperMovieDetailFromApiToUi :
-    MapperBoth<MovieDetailResponse, List<MovieRecommendPreview>, MovieDetail> {
+    MapperTriple<MovieDetailResponse, List<MovieRecommendPreview>, List<Cast>, MovieDetail> {
     override fun mapperFrom(
         from1: MovieDetailResponse,
-        from2: List<MovieRecommendPreview>
+        from2: List<MovieRecommendPreview>,
+        from3: List<Cast>
     ): MovieDetail {
         return MovieDetail(
             movieId = from1.id ?: -1,
@@ -35,7 +37,8 @@ object MapperMovieDetailFromApiToUi :
                 ?.filter { it.name != null }
                 ?.joinToString(", ") { it.name ?: "" },
             rating = from1.voteAverage?.toFloat() ?: 0.0F,
-            movieRecommendations = from2
+            movieRecommendations = from2,
+            seriesCast = from3
         )
     }
 }

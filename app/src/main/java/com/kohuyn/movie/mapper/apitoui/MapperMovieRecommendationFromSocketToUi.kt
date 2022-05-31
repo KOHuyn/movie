@@ -11,7 +11,9 @@ object MapperMovieRecommendationFromSocketToUi :
         return MovieRecommendPreview(
             id = from.id ?: -1,
             title = from.title ?: "-",
-            posterPath = MovieImageLoader.loadPoster(from.posterPath),
+            posterPath = MovieImageLoader.loadBackdropPath(from.backdropPath),
+            ratePercent = from.voteAverage?.times(10)
+                ?.let { "%.2f".format(it)+ "%" }
         )
     }
 }

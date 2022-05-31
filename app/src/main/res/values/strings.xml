@@ -18,4 +18,7 @@
     <string name="genres_value">Genres: %1$s</string>
     <string name="rating_value">Rating (%1$s votes):</string>
     <string name="recommendations">Recommendations</string>
+    <string name="series_cast">Series cast</string>
+    <string name="overview">Overview</string>
+    <string name="episodes_value">%1$d Episodes</string>
 </resources>

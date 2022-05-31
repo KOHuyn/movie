@@ -23,7 +23,6 @@
                 android:id="@+id/collapsingToolbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_gradient_black_transparent"
                 app:collapsedTitleTextAppearance="@style/CollapsingToolbar.TextMovie.Collapse"
                 app:contentScrim="@color/white"
                 app:expandedTitleTextAppearance="@style/CollapsingToolbar.TextMovie.Expanded"
@@ -36,6 +35,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="200dp"
                     app:layout_collapseMode="parallax" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:background="@drawable/bg_gradient_black_transparent" />
 
                 <androidx.appcompat.widget.Toolbar
                     android:id="@+id/toolbar"
@@ -166,6 +170,68 @@
                     app:constraint_referenced_ids="ratingBar,cvIvPoster" />
 
                 <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvOverviewLabel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/overview"
+                    android:textColor="@color/black"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/barrierMovieDetail" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvOverview"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/black"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvOverviewLabel"
+                    tools:text="@string/overview" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvSeriesCastLabel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/series_cast"
+                    android:textColor="@color/black"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvOverview" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rcvSeriesCast"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    app:layout_constraintTop_toBottomOf="@id/tvSeriesCastLabel"
+                    tools:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:listitem="@layout/item_series_cast" />
+
+                <androidx.core.widget.ContentLoadingProgressBar
+                    android:id="@+id/loadingSeriesCastProgress"
+                    style="@style/Widget.AppCompat.ProgressBar"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_margin="20dp"
+                    android:indeterminateTint="@color/secondary"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvSeriesCastLabel" />
+
+                <androidx.constraintlayout.widget.Barrier
+                    android:id="@+id/barrierSeriesCast"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:barrierDirection="bottom"
+                    app:barrierMargin="8dp"
+                    app:constraint_referenced_ids="rcvSeriesCast,loadingSeriesCastProgress" />
+
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/tvRecommendationLabel"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -175,7 +241,7 @@
                     android:textStyle="bold"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/barrierMovieDetail" />
+                    app:layout_constraintTop_toBottomOf="@id/barrierSeriesCast" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rcvRecommendation"

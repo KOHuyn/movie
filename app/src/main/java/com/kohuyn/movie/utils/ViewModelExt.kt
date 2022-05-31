@@ -7,8 +7,10 @@ import com.kohuyn.movie.model.response.StatusResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import retrofit2.HttpException
+import timber.log.Timber
 
 fun ViewModel.getApiError(e: Throwable): StatusResponse {
+    Timber.e(e)
     return if (e is HttpException) {
         try {
             Gson().fromJson(e.response()?.errorBody()?.string(), StatusResponse::class.java)

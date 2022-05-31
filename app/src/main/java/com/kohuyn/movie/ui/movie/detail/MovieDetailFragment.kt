@@ -26,6 +26,7 @@ import com.kohuyn.movie.databinding.FragmentMovieDetailBinding
 import com.kohuyn.movie.model.MovieDetail
 import com.kohuyn.movie.ui.alert.MessageDialog
 import com.kohuyn.movie.ui.login.LoginDialog
+import com.kohuyn.movie.ui.movie.adapter.MovieCastAdapter
 import com.kohuyn.movie.ui.movie.adapter.MovieRecommendationAdapter
 import com.kohuyn.movie.utils.StorageCache
 import kotlinx.coroutines.flow.collect
@@ -62,6 +63,7 @@ class MovieDetailFragment : Fragment() {
     private val vm by viewModels<MovieDetailViewModel>()
 
     private val recommendationAdapter by lazy { MovieRecommendationAdapter() }
+    private val seriesCastAdapter by lazy { MovieCastAdapter() }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -96,10 +98,20 @@ class MovieDetailFragment : Fragment() {
     }
 
     private fun initRcv() {
-        binding.rcvRecommendation.adapter = recommendationAdapter
-        binding.rcvRecommendation.setHasFixedSize(true)
-        binding.rcvRecommendation.layoutManager =
-            LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        //recommendation
+        binding.rcvRecommendation.apply {
+            adapter = recommendationAdapter
+            setHasFixedSize(true)
+            layoutManager =
+                LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        }
+        //series cast
+        binding.rcvSeriesCast.apply {
+            adapter = seriesCastAdapter
+            setHasFixedSize(true)
+            layoutManager =
+                LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        }
     }
 
     private fun initListener() {
@@ -145,6 +157,13 @@ class MovieDetailFragment : Fragment() {
                 .flowWithLifecycle(lifecycle)
                 .collect { isLoading ->
                     setLoading(isLoading)
+                }
+        }
+        lifecycleScope.launch {
+            vm.loadingSeriesCast
+                .flowWithLifecycle(lifecycle)
+                .collect { isLoading ->
+                    setLoadingSeriesCast(isLoading)
                 }
         }
         lifecycleScope.launch {
@@ -200,11 +219,20 @@ class MovieDetailFragment : Fragment() {
         binding.tvGenres.text = getString(R.string.genres_value, movie.genres)
         binding.tvRating.text = getString(R.string.rating_value, movie.voteCount?.toString())
         binding.ratingBar.rating = movie.rating
+        binding.tvOverview.text = movie.overview
+        //series cast
+        movie.seriesCast.isNullOrEmpty().let { isEmpty ->
+            binding.tvSeriesCastLabel.isGone = isEmpty
+            binding.rcvSeriesCast.isGone = isEmpty
+        }
+        seriesCastAdapter.items = movie.seriesCast
+        //recommendation
         movie.movieRecommendations.isNullOrEmpty().let { isEmpty ->
             binding.tvRecommendationLabel.isGone = isEmpty
             binding.rcvRecommendation.isGone = isEmpty
         }
         recommendationAdapter.items = movie.movieRecommendations
+        //favorite
         binding.fabFavorite.icon = ResourcesCompat.getDrawable(
             resources,
             if (movie.isFavorite) R.drawable.ic_favorited else R.drawable.ic_favorite,
@@ -229,6 +257,15 @@ class MovieDetailFragment : Fragment() {
             binding.loadingRecommendationProgress.show()
         } else {
             binding.loadingRecommendationProgress.hide()
+        }
+    }
+
+    private fun setLoadingSeriesCast(isLoading: Boolean) {
+        binding.rcvSeriesCast.isGone = isLoading
+        if (isLoading) {
+            binding.loadingSeriesCastProgress.show()
+        } else {
+            binding.loadingSeriesCastProgress.hide()
         }
     }
 
