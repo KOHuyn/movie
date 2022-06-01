@@ -5,14 +5,12 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.view.WindowManager
+import android.view.*
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.isGone
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.flowWithLifecycle
@@ -86,6 +84,7 @@ class MovieDetailFragment : Fragment() {
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
         )
+        setupView()
         binding.appBarDetail.addOnOffsetChangedListener(onOffsetChangeListener)
         super.onStart()
     }
@@ -102,6 +101,17 @@ class MovieDetailFragment : Fragment() {
         initRcv()
         initListener()
         observeViewModel()
+    }
+
+    private fun setupView() {
+        val hasMenuKey = ViewConfiguration.get(context).hasPermanentMenuKey()
+        val hasBackKey = KeyCharacterMap.deviceHasKey(KeyEvent.KEYCODE_BACK)
+        if (!hasMenuKey && !hasBackKey) {
+            val resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android")
+            if (resourceId > 0) {
+                binding.root.updatePadding(bottom = resources.getDimensionPixelSize(resourceId))
+            }
+        }
     }
 
     private fun initRcv() {
@@ -328,7 +338,7 @@ class MovieDetailFragment : Fragment() {
     }
 
     private fun setLoadingMovieDetail(isLoading: Boolean) {
-        binding.clDetail.isGone = isLoading
+        binding.contentMovie.isGone = isLoading
         if (isLoading) {
             binding.loadingProgress.show()
         } else {
