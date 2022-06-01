@@ -20,6 +20,8 @@ class PosterAdapter : RecyclerView.Adapter<PosterAdapter.PosterVH>() {
             }
         }
 
+    var onItemClickListener: ((movieId: Int) -> Unit)? = null
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PosterVH {
         return PosterVH.create(parent)
     }
@@ -36,6 +38,9 @@ class PosterAdapter : RecyclerView.Adapter<PosterAdapter.PosterVH>() {
             binding.tvDatePoster.text = item.releaseDate
             binding.progressRatePercent.progress = item.votePercent
             binding.tvRatePercent.text = "${item.votePercent}%"
+            binding.root.setOnClickListener {
+                onItemClickListener?.invoke(item.id)
+            }
         }
     }
 

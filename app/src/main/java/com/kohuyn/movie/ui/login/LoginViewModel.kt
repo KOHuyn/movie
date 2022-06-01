@@ -19,8 +19,8 @@ class LoginViewModel : ViewModel() {
     private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> get() = _isLoading
 
-    private val _messages: MutableStateFlow<List<UiMessage>> = MutableStateFlow(listOf())
-    val messages: StateFlow<List<UiMessage>> get() = _messages
+    private val _messages: MutableStateFlow<List<UiMessage<Unit>>> = MutableStateFlow(listOf())
+    val messages: StateFlow<List<UiMessage<Unit>>> get() = _messages
 
     var onLoginSuccess: () -> Unit = {}
 

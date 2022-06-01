@@ -9,11 +9,13 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.kohuyn.movie.R
 import com.kohuyn.movie.databinding.FragmentHomeBinding
 import com.kohuyn.movie.ui.alert.MessageDialog
 import com.kohuyn.movie.ui.home.adapter.PosterAdapter
+import com.kohuyn.movie.ui.movie.detail.MovieDetailFragment
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -81,10 +83,13 @@ class HomeFragment : Fragment() {
         binding.rcvPoster.setHasFixedSize(true)
     }
 
-    private fun initListener(){
+    private fun initListener() {
         binding.refreshLayout.setOnRefreshListener {
             vm.loadPosters()
             binding.refreshLayout.isRefreshing = false
+        }
+        adapter.onItemClickListener = { movieId ->
+            MovieDetailFragment.navigateToMovieDetail(findNavController(), movieId)
         }
     }
 

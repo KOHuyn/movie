@@ -7,8 +7,10 @@ import com.kohuyn.movie.model.response.StatusResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import retrofit2.HttpException
+import timber.log.Timber
 
 fun ViewModel.getApiError(e: Throwable): StatusResponse {
+    Timber.e(e)
     return if (e is HttpException) {
         try {
             Gson().fromJson(e.response()?.errorBody()?.string(), StatusResponse::class.java)
@@ -20,10 +22,30 @@ fun ViewModel.getApiError(e: Throwable): StatusResponse {
     }
 }
 
-fun MutableStateFlow<List<UiMessage>>.addMessage(message: String) {
+fun <T> MutableStateFlow<List<UiMessage<T>>>.addMessage(message: String) {
     update { messages ->
         messages.toMutableList().apply {
             add(UiMessage(message))
         }
     }
 }
+
+fun <T> Set<UiMessage<T>>.addMessage(
+    message: String,
+    type: T? = null,
+    code: Int = -1,
+): Set<UiMessage<T>> {
+    return toMutableSet().apply {
+        add(UiMessage(message = message, code = code, type = type))
+    }
+}
+
+fun <T> Set<UiMessage<T>>.addMessage(
+    message: StatusResponse,
+    type: T? = null,
+): Set<UiMessage<T>> {
+    return toMutableSet().apply {
+        add(UiMessage(message = message.statusMessage, code = message.statusCode, type = type))
+    }
+}
+

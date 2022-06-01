@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">Movie</string>
     <string name="home">Home</string>
-    <string name="favourite">Favourite</string>
+    <string name="favorite">Favorite</string>
+    <string name="un_favorite">Un favorite</string>
     <string name="remove">Remove</string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
@@ -11,4 +12,15 @@
     <string name="password">Password</string>
     <string name="or">or</string>
     <string name="register"><u>Register</u></string>
+    <string name="spoken_language_value">Language: %1$s</string>
+    <string name="status_value">Status: %1$s</string>
+    <string name="release_date_value">Release: %1$s</string>
+    <string name="genres_value">Genres: %1$s</string>
+    <string name="rating_value">Rating (%1$s votes):</string>
+    <string name="recommendations">Recommendations</string>
+    <string name="series_cast">Series cast</string>
+    <string name="trailer">Trailer</string>
+    <string name="overview">Overview</string>
+    <string name="episodes_value">%1$d Episodes</string>
+    <string name="back">Back</string>
 </resources>
