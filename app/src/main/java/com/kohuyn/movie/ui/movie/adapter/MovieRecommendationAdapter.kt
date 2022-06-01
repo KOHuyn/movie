@@ -3,11 +3,13 @@ package com.kohuyn.movie.ui.movie.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.kohuyn.movie.databinding.ItemMovieRecommendationBinding
 import com.kohuyn.movie.model.MovieRecommendPreview
+import timber.log.Timber
 
 class MovieRecommendationAdapter :
     RecyclerView.Adapter<MovieRecommendationAdapter.MovieRecommendationVH>() {
@@ -54,30 +56,44 @@ class MovieRecommendationAdapter :
             binding.tvNameDescribe.text = item.title
             binding.tvTitle.text = item.title
             binding.tvRatePercent.text = item.ratePercent
-            binding.root.setHeightLayout {
-                notifyItemChanged(position)
-            }
-            binding.root.addOnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
-                v.setHeightLayout {
-                    notifyItemChanged(position)
+            binding.root.let { v ->
+                if (v.measuredHeight in 1 until maxHeightItem) {
+                    v.updateLayoutParams {
+                        height = maxHeightItem
+                    }
                 }
             }
+            binding.root.viewTreeObserver.addOnGlobalLayoutListener(object :
+                ViewTreeObserver.OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    binding.root.setHeightLayout(adapterPosition)
+                    if (binding.root.measuredHeight == maxHeightItem) {
+                        binding.root.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                    }
+                }
+            })
             binding.root.setOnClickListener { onItemClick?.invoke(item.id) }
         }
     }
 
-    private fun View.setHeightLayout(onUpdateLayoutParam: () -> Unit) {
-        addOnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
-            if (maxHeightItem > v.measuredHeight) {
-                v.updateLayoutParams {
-                    height = maxHeightItem
-                    v.post {
-                        onUpdateLayoutParam()
-                    }
+    private fun View.setHeightLayout(position: Int) {
+        if (position !in 0 until itemCount) return
+        when {
+            maxHeightItem < measuredHeight -> {
+                maxHeightItem = measuredHeight
+                post {
+                    notifyDataSetChanged()
                 }
-            } else {
-                maxHeightItem = v.measuredHeight
             }
+            measuredHeight in 1 until maxHeightItem -> {
+                updateLayoutParams {
+                    height = maxHeightItem
+                }
+                post {
+                    notifyItemChanged(position)
+                }
+            }
+            else -> {}
         }
     }
 

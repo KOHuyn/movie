@@ -1,7 +1,9 @@
 package com.kohuyn.movie.ui.movie.detail
 
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,7 +13,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.isGone
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.flowWithLifecycle
@@ -26,10 +27,12 @@ import com.kohuyn.movie.databinding.FragmentMovieDetailBinding
 import com.kohuyn.movie.model.Cast
 import com.kohuyn.movie.model.MovieDetail
 import com.kohuyn.movie.model.MovieRecommendPreview
+import com.kohuyn.movie.model.Video
 import com.kohuyn.movie.ui.alert.MessageDialog
 import com.kohuyn.movie.ui.login.LoginDialog
 import com.kohuyn.movie.ui.movie.adapter.MovieCastAdapter
 import com.kohuyn.movie.ui.movie.adapter.MovieRecommendationAdapter
+import com.kohuyn.movie.ui.movie.adapter.MovieVideoAdapter
 import com.kohuyn.movie.utils.StorageCache
 import com.kohuyn.movie.utils.toast
 import kotlinx.coroutines.flow.collect
@@ -56,7 +59,6 @@ class MovieDetailFragment : Fragment() {
             } else {
                 binding.fabFavorite.shrink()
             }
-
         }
     }
 
@@ -68,6 +70,7 @@ class MovieDetailFragment : Fragment() {
 
     private val recommendationAdapter by lazy { MovieRecommendationAdapter() }
     private val seriesCastAdapter by lazy { MovieCastAdapter() }
+    private val movieVideoAdapter by lazy { MovieVideoAdapter() }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -116,11 +119,26 @@ class MovieDetailFragment : Fragment() {
             layoutManager =
                 LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         }
+        //video
+        binding.rcvVideoTrailer.apply {
+            adapter = movieVideoAdapter
+            setHasFixedSize(true)
+            layoutManager =
+                LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        }
     }
 
     private fun initListener() {
         recommendationAdapter.onItemClick = { movieId ->
             navigateToMovieDetail(findNavController(), movieId)
+        }
+        movieVideoAdapter.onItemClick = { urlVideo ->
+            if (urlVideo == null) {
+                toast("No Url available")
+            } else {
+                val playVideoIntent = Intent(Intent.ACTION_VIEW, Uri.parse(urlVideo))
+                context?.startActivity(playVideoIntent)
+            }
         }
         binding.toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
         binding.fabFavorite.setOnClickListener {
@@ -171,6 +189,15 @@ class MovieDetailFragment : Fragment() {
         }
         lifecycleScope.launch {
             vm.movieUiState
+                .map { it.videos }
+                .distinctUntilChanged()
+                .flowWithLifecycle(lifecycle)
+                .collect { videos ->
+                    bindVideos(videos)
+                }
+        }
+        lifecycleScope.launch {
+            vm.movieUiState
                 .map { it.isFavorite }
                 .distinctUntilChanged()
                 .flowWithLifecycle(lifecycle)
@@ -185,7 +212,7 @@ class MovieDetailFragment : Fragment() {
                 .distinctUntilChanged()
                 .flowWithLifecycle(lifecycle)
                 .collect { isLoading ->
-                    setLoading(isLoading)
+                    setLoadingMovieDetail(isLoading)
                 }
         }
         lifecycleScope.launch {
@@ -195,6 +222,15 @@ class MovieDetailFragment : Fragment() {
                 .flowWithLifecycle(lifecycle)
                 .collect { isLoading ->
                     setLoadingSeriesCast(isLoading)
+                }
+        }
+        lifecycleScope.launch {
+            vm.movieUiState
+                .map { it.isLoadingVideos }
+                .distinctUntilChanged()
+                .flowWithLifecycle(lifecycle)
+                .collect { isLoading ->
+                    setLoadingVideos(isLoading)
                 }
         }
         lifecycleScope.launch {
@@ -276,6 +312,11 @@ class MovieDetailFragment : Fragment() {
         seriesCastAdapter.items = seriesCast
     }
 
+    private fun bindVideos(videos: List<Video>) {
+        binding.groupVideoTrailer.isGone = videos.isNullOrEmpty()
+        movieVideoAdapter.items = videos
+    }
+
     private fun bindFavorite(isFavorite: Boolean) {
         binding.fabFavorite.icon = ResourcesCompat.getDrawable(
             resources,
@@ -286,7 +327,7 @@ class MovieDetailFragment : Fragment() {
             getString(if (isFavorite) R.string.un_favorite else R.string.favorite)
     }
 
-    private fun setLoading(isLoading: Boolean) {
+    private fun setLoadingMovieDetail(isLoading: Boolean) {
         binding.clDetail.isGone = isLoading
         if (isLoading) {
             binding.loadingProgress.show()
@@ -310,6 +351,15 @@ class MovieDetailFragment : Fragment() {
             binding.loadingSeriesCastProgress.show()
         } else {
             binding.loadingSeriesCastProgress.hide()
+        }
+    }
+
+    private fun setLoadingVideos(isLoading: Boolean) {
+        binding.rcvVideoTrailer.isGone = isLoading
+        if (isLoading) {
+            binding.loadingVideoTrailerProgress.show()
+        } else {
+            binding.loadingVideoTrailerProgress.hide()
         }
     }
 

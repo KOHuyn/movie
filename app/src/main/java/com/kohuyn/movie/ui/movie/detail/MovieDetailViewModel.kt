@@ -5,11 +5,14 @@ import androidx.lifecycle.viewModelScope
 import com.google.gson.JsonObject
 import com.kohuyn.movie.mapper.apitoui.MapperMovieDetailFromApiToUi
 import com.kohuyn.movie.mapper.apitoui.MapperMovieRecommendationFromSocketToUi
+import com.kohuyn.movie.mapper.apitoui.MapperMovieVideosFromApiToUi
 import com.kohuyn.movie.mapper.apitoui.MapperSeriesCastFromSocketToUi
 import com.kohuyn.movie.model.Cast
 import com.kohuyn.movie.model.MovieDetail
 import com.kohuyn.movie.model.MovieRecommendPreview
+import com.kohuyn.movie.model.Video
 import com.kohuyn.movie.model.response.MovieDetailResponse
+import com.kohuyn.movie.model.response.MovieVideoResponse
 import com.kohuyn.movie.model.response.PostersResponse
 import com.kohuyn.movie.model.response.SeriesCastResponse
 import com.kohuyn.movie.network.RetrofitUtils
@@ -20,7 +23,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 enum class TypeMovieDetailUi {
-    MOVIE, SERIES_CAST, RECOMMENDATIONS, FAVORITE
+    MOVIE, SERIES_CAST, RECOMMENDATIONS, VIDEOS, FAVORITE
 }
 
 data class MovieUiState(
@@ -28,11 +31,13 @@ data class MovieUiState(
     val movieDetail: MovieDetail? = null,
     val movieRecommendations: List<MovieRecommendPreview> = emptyList(),
     val seriesCast: List<Cast> = emptyList(),
+    val videos: List<Video> = emptyList(),
     val isFavorite: Boolean = false,
     //state
     val isLoadingMovieDetail: Boolean = false,
     val isLoadingSeriesCast: Boolean = false,
     val isLoadingRecommendation: Boolean = false,
+    val isLoadingVideos: Boolean = false,
     val isLoadingFavorite: Boolean = false,
     val messageError: Set<UiMessage<TypeMovieDetailUi>> = emptySet(),
 ) {
@@ -135,11 +140,41 @@ class MovieDetailViewModel : ViewModel() {
             }
     }
 
+    private fun getMovieVideoResponse(movieId: Int): Flow<MovieVideoResponse> {
+        return flow { emit(RetrofitUtils.apiService.getVideoMovie(movieId)) }
+            .onStart {
+                _movieUiState.update { movieUiState ->
+                    movieUiState.copy(isLoadingVideos = true)
+                }
+            }
+            .onCompletion {
+                _movieUiState.update { movieUiState ->
+                    movieUiState.copy(isLoadingVideos = false)
+                }
+            }
+            .onEach { videosResponse ->
+                _movieUiState.update { movieUiState ->
+                    val videos = MapperMovieVideosFromApiToUi.mapperFrom(videosResponse)
+                    movieUiState.copy(videos = videos)
+                }
+            }
+            .catch { e ->
+                _movieUiState.update { movieUiState ->
+                    val statusResponse = getApiError(e)
+                    movieUiState.copy(
+                        messageError = movieUiState.messageError
+                            .addMessage(statusResponse, TypeMovieDetailUi.SERIES_CAST)
+                    )
+                }
+            }
+    }
+
     fun getMovie(movieId: Int) {
         merge(
             getMovieDetailResponse(movieId),
             getMovieRecommendationResponse(movieId),
-            getSeriesCastResponse(movieId)
+            getSeriesCastResponse(movieId),
+            getMovieVideoResponse(movieId)
         ).launchIn(viewModelScope)
     }
 

@@ -42,4 +42,7 @@ interface MovieApiService {
 
     @GET("movie/{movie_id}/casts")
     suspend fun getSeriesCastMovie(@Path("movie_id") movieId: Int): SeriesCastResponse
+
+    @GET("movie/{movie_id}/videos")
+    suspend fun getVideoMovie(@Path("movie_id") movieId: Int): MovieVideoResponse
 }

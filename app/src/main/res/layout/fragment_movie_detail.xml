@@ -218,12 +218,6 @@
                     tools:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                     tools:listitem="@layout/item_series_cast" />
 
-                <androidx.constraintlayout.widget.Group
-                    android:id="@+id/groupSeriesCast"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:constraint_referenced_ids="tvSeriesCastLabel,rcvSeriesCast,loadingSeriesCastProgress" />
-
                 <androidx.core.widget.ContentLoadingProgressBar
                     android:id="@+id/loadingSeriesCastProgress"
                     style="@style/Widget.AppCompat.ProgressBar"
@@ -235,6 +229,12 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/tvSeriesCastLabel" />
 
+                <androidx.constraintlayout.widget.Group
+                    android:id="@+id/groupSeriesCast"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:constraint_referenced_ids="tvSeriesCastLabel,rcvSeriesCast,loadingSeriesCastProgress" />
+
                 <androidx.constraintlayout.widget.Barrier
                     android:id="@+id/barrierSeriesCast"
                     android:layout_width="wrap_content"
@@ -242,6 +242,52 @@
                     app:barrierDirection="bottom"
                     app:barrierMargin="8dp"
                     app:constraint_referenced_ids="rcvSeriesCast,loadingSeriesCastProgress" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvVideoTrailerLabel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/trailer"
+                    android:textColor="@color/black"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/barrierSeriesCast" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rcvVideoTrailer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    app:layout_constraintTop_toBottomOf="@id/tvVideoTrailerLabel"
+                    tools:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:listitem="@layout/item_movie_video" />
+
+                <androidx.core.widget.ContentLoadingProgressBar
+                    android:id="@+id/loadingVideoTrailerProgress"
+                    style="@style/Widget.AppCompat.ProgressBar"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_margin="20dp"
+                    android:indeterminateTint="@color/secondary"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvVideoTrailerLabel" />
+
+                <androidx.constraintlayout.widget.Group
+                    android:id="@+id/groupVideoTrailer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:constraint_referenced_ids="tvVideoTrailerLabel,rcvVideoTrailer,loadingVideoTrailerProgress" />
+
+                <androidx.constraintlayout.widget.Barrier
+                    android:id="@+id/barrierVideoTrailer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:barrierDirection="bottom"
+                    app:barrierMargin="8dp"
+                    app:constraint_referenced_ids="rcvVideoTrailer,loadingVideoTrailerProgress" />
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/tvRecommendationLabel"
@@ -253,7 +299,7 @@
                     android:textStyle="bold"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/barrierSeriesCast" />
+                    app:layout_constraintTop_toBottomOf="@id/barrierVideoTrailer" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rcvRecommendation"
@@ -286,7 +332,8 @@
                     android:layout_height="wrap_content"
                     app:barrierDirection="bottom"
                     app:barrierMargin="8dp"
-                    app:constraint_referenced_ids="rcvRecommendation,loadingRecommendationProgress" />
+                    app:constraint_referenced_ids="rcvRecommendation,loadingRecommendationProgress"
+                    app:layout_constraintBottom_toBottomOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.core.widget.NestedScrollView>
 

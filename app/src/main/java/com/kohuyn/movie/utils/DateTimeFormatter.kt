@@ -13,4 +13,13 @@ object DateTimeFormatter {
             dateStr
         }
     }
+
+    fun formatToTimestamp(dateStr: String?, pattern: String): Long? {
+        if (dateStr == null) return null
+        return try {
+            SimpleDateFormat(pattern, Locale.ROOT).parse(dateStr)?.time
+        } catch (e: Exception) {
+            null
+        }
+    }
 }
