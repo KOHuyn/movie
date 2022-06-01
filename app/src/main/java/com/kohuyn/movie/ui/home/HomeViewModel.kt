@@ -2,16 +2,22 @@ package com.kohuyn.movie.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kohuyn.movie.db.RoomDbUtils
+import com.kohuyn.movie.mapper.apitodb.MapperMovieFromDbToUi
 import com.kohuyn.movie.mapper.apitoui.MapperMovieFromApiToUi
 import com.kohuyn.movie.model.Poster
 import com.kohuyn.movie.network.RetrofitUtils
 import com.kohuyn.movie.utils.UiMessage
 import com.kohuyn.movie.utils.addMessage
 import com.kohuyn.movie.utils.getApiError
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class HomeViewModel : ViewModel() {
+
+    val movieDao = RoomDbUtils.movieDao
+
     private val _posters: MutableStateFlow<List<Poster>> = MutableStateFlow(listOf())
     val posters: StateFlow<List<Poster>> get() = _posters
 
@@ -31,6 +37,10 @@ class HomeViewModel : ViewModel() {
                 .catch { e ->
                     val statusResponse = getApiError(e)
                     _messages.addMessage(statusResponse.statusMessage)
+                }
+                .onEach { response ->
+                    val moviesDb = MapperMovieFromDbToUi.mapperFrom(response)
+                    movieDao.insertAll(moviesDb)
                 }
                 .collect { posters ->
                     _posters.update {
