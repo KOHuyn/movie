@@ -11,7 +11,9 @@ import com.kohuyn.movie.R
 import com.kohuyn.movie.databinding.FragmentMainBinding
 import com.kohuyn.movie.ui.favourite.FavouriteFragment
 import com.kohuyn.movie.ui.home.HomeFragment
+import com.kohuyn.movie.ui.login.LoginDialog
 import com.kohuyn.movie.ui.main.adapter.MainPagerAdapter
+import com.kohuyn.movie.utils.StorageCache
 
 class MainFragment : Fragment() {
     private lateinit var binding: FragmentMainBinding
@@ -54,11 +56,20 @@ class MainFragment : Fragment() {
             orientation = ViewPager2.ORIENTATION_HORIZONTAL
         }
         binding.bottomBar.setOnItemSelectedListener { menu ->
-            fragmentPagers.mapIndexed { index, pagerItem -> pagerItem.idMenuPager to index }
-                .find { (idTabPager, _) -> idTabPager == menu.itemId }?.second?.let { index ->
-                    binding.viewPagerMain.setCurrentItem(index, false)
-                }
-            true
+            if (menu.itemId == R.id.favourite && StorageCache.token.isNullOrBlank()) {
+                LoginDialog()
+                    .show(childFragmentManager)
+                    .setOnLoginSuccess {
+                        binding.bottomBar.selectedItemId = R.id.favourite
+                    }
+                false
+            } else {
+                fragmentPagers.mapIndexed { index, pagerItem -> pagerItem.idMenuPager to index }
+                    .find { (idTabPager, _) -> idTabPager == menu.itemId }?.second?.let { index ->
+                        binding.viewPagerMain.setCurrentItem(index, false)
+                    }
+                true
+            }
         }
     }
 

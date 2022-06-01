@@ -34,9 +34,8 @@ class PosterAdapter : RecyclerView.Adapter<PosterAdapter.PosterVH>() {
 
             binding.tvTitlePoster.text = item.title
             binding.tvDatePoster.text = item.releaseDate
-            //todo fake
-            binding.progressRatePercent.progress = 10
-            binding.tvRatePercent.text = "10%"
+            binding.progressRatePercent.progress = item.votePercent
+            binding.tvRatePercent.text = "${item.votePercent}%"
         }
     }
 

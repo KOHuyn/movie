@@ -10,7 +10,9 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.kohuyn.movie.R
 import com.kohuyn.movie.databinding.FragmentFavouriteBinding
+import com.kohuyn.movie.ui.alert.MessageDialog
 import com.kohuyn.movie.ui.favourite.adapter.FavouriteAdapter
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -39,7 +41,12 @@ class FavouriteFragment : Fragment() {
 
     private fun initListener() {
         adapter.onRemoveItemListener = { idPoster ->
-            vm.removeFavourite(idPoster)
+            vm.removeFavorite(idPoster)
+        }
+
+        binding.refreshLayout.setOnRefreshListener {
+            vm.loadPosters()
+            binding.refreshLayout.isRefreshing = false
         }
     }
 
@@ -56,6 +63,24 @@ class FavouriteFragment : Fragment() {
                 .flowWithLifecycle(lifecycle)
                 .collect { isLoading ->
                     setLoading(isLoading)
+                }
+        }
+
+        lifecycleScope.launch {
+            vm.messages
+                .flowWithLifecycle(lifecycle)
+                .collect { messages ->
+                    if (messages.isNotEmpty()) {
+                        val messageShow = messages.first()
+                        MessageDialog.Builder()
+                            .setMessage(messageShow.message)
+                            .setButtonPositive { dialog ->
+                                dialog.dismiss()
+                            }
+                            .setOnDismissListener { vm.setMessageShown(messageShow.message) }
+                            .setCancelable(false)
+                            .build(childFragmentManager)
+                    }
                 }
         }
     }

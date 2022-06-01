@@ -2,8 +2,12 @@ package com.kohuyn.movie.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kohuyn.movie.mapper.apitoui.MapperDiscoverFromApiToUi
 import com.kohuyn.movie.model.Poster
-import kotlinx.coroutines.delay
+import com.kohuyn.movie.network.RetrofitUtils
+import com.kohuyn.movie.utils.UiMessage
+import com.kohuyn.movie.utils.addMessage
+import com.kohuyn.movie.utils.getApiError
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -14,38 +18,33 @@ class HomeViewModel : ViewModel() {
     private val _loading: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val loading: StateFlow<Boolean> get() = _loading
 
+    private val _messages: MutableStateFlow<List<UiMessage>> = MutableStateFlow(listOf())
+    val messages: StateFlow<List<UiMessage>> get() = _messages
+
     fun loadPosters() {
         viewModelScope.launch {
             flow {
-                //loading
-                delay(2000)
-                emit(generatePosters())
+                emit(RetrofitUtils.apiService.getDiscoverMovie())
             }
                 .onStart { _loading.update { true } }
                 .onCompletion { _loading.update { false } }
+                .catch { e ->
+                    val statusResponse = getApiError(e)
+                    _messages.addMessage(statusResponse.statusMessage)
+                }
                 .collect { posters ->
-                    _posters.update { posters }
+                    _posters.update {
+                        posters.results.map {
+                            MapperDiscoverFromApiToUi.mapperFrom(it)
+                        }
+                    }
                 }
         }
     }
 
-    private fun generatePosters(): List<Poster> {
-        return List(5) {
-            Poster(
-                id = it,
-                title = "How to Move On in 30 Days",
-                posterPath = "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/2cLWJiDOZvhoIaX2r2Zb78K66JQ.jpg",
-                releaseDate = "Apr 04, 2022",
-                adult = false,
-                overview = "We don't have an overview translated in English. Help us expand our database by adding one.",
-                originalTitle = "How to Move On in 30 Days",
-                originalLanguage = "English",
-                backdropPath = "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/2cLWJiDOZvhoIaX2r2Zb78K66JQ.jpg",
-                popularity = 1,
-                voteCount = 1,
-                video = false,
-                voteAverage = 1
-            )
+    fun setMessageShown(message: String) {
+        _messages.update { messages ->
+            messages.filterNot { it.message == message }
         }
     }
 }
