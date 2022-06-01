@@ -6,7 +6,9 @@ import com.google.gson.JsonObject
 import com.kohuyn.movie.mapper.apitoui.MapperMovieDetailFromApiToUi
 import com.kohuyn.movie.mapper.apitoui.MapperMovieRecommendationFromSocketToUi
 import com.kohuyn.movie.mapper.apitoui.MapperSeriesCastFromSocketToUi
+import com.kohuyn.movie.model.Cast
 import com.kohuyn.movie.model.MovieDetail
+import com.kohuyn.movie.model.MovieRecommendPreview
 import com.kohuyn.movie.model.response.MovieDetailResponse
 import com.kohuyn.movie.model.response.PostersResponse
 import com.kohuyn.movie.model.response.SeriesCastResponse
@@ -17,67 +19,128 @@ import com.kohuyn.movie.utils.getApiError
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
+enum class TypeMovieDetailUi {
+    MOVIE, SERIES_CAST, RECOMMENDATIONS, FAVORITE
+}
+
+data class MovieUiState(
+    //data
+    val movieDetail: MovieDetail? = null,
+    val movieRecommendations: List<MovieRecommendPreview> = emptyList(),
+    val seriesCast: List<Cast> = emptyList(),
+    val isFavorite: Boolean = false,
+    //state
+    val isLoadingMovieDetail: Boolean = false,
+    val isLoadingSeriesCast: Boolean = false,
+    val isLoadingRecommendation: Boolean = false,
+    val isLoadingFavorite: Boolean = false,
+    val messageError: Set<UiMessage<TypeMovieDetailUi>> = emptySet(),
+) {
+    companion object {
+        fun getDefault() = MovieUiState()
+    }
+}
+
 class MovieDetailViewModel : ViewModel() {
-    private val _movieDetail: MutableStateFlow<MovieDetail?> = MutableStateFlow(null)
-    val movieDetail: StateFlow<MovieDetail?> get() = _movieDetail
-
-    private val _loading: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val loading: StateFlow<Boolean> get() = _loading
-    private val _loadingMovieRecommendation: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val loadingMovieRecommendation: StateFlow<Boolean> get() = _loading
-
-    private val _loadingSeriesCast: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val loadingSeriesCast: StateFlow<Boolean> get() = _loadingSeriesCast
-
-    private val _messages: MutableStateFlow<List<UiMessage>> = MutableStateFlow(listOf())
-    val messages: StateFlow<List<UiMessage>> get() = _messages
-
-    private val _isLoadingFavorite: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val loadingFavorite: StateFlow<Boolean> get() = _isLoadingFavorite
+    private val _movieUiState: MutableStateFlow<MovieUiState> =
+        MutableStateFlow(MovieUiState.getDefault())
+    val movieUiState: StateFlow<MovieUiState> get() = _movieUiState
 
     private fun getMovieDetailResponse(movieId: Int): Flow<MovieDetailResponse> {
         return flow { emit(RetrofitUtils.apiService.getMovieDetail(movieId)) }
-            .onStart { _loading.update { true } }
-            .onCompletion { _loading.update { false } }
+            .onStart {
+                _movieUiState.update { movieUiState ->
+                    movieUiState.copy(isLoadingMovieDetail = true)
+                }
+            }
+            .onCompletion {
+                _movieUiState.update { movieUiState ->
+                    movieUiState.copy(isLoadingMovieDetail = false)
+                }
+            }
+            .onEach { movie ->
+                _movieUiState.update { movieUiState ->
+                    val movieDetail = MapperMovieDetailFromApiToUi.mapperFrom(movie)
+                    movieUiState.copy(movieDetail = movieDetail)
+                }
+            }
+            .catch { e ->
+                _movieUiState.update { movieUiState ->
+                    val statusResponse = getApiError(e)
+                    movieUiState.copy(
+                        messageError = movieUiState.messageError
+                            .addMessage(statusResponse.statusMessage, TypeMovieDetailUi.MOVIE)
+                    )
+                }
+            }
     }
 
     private fun getMovieRecommendationResponse(movieId: Int): Flow<PostersResponse> {
         return flow { emit(RetrofitUtils.apiService.getMovieRecommendations(movieId)) }
-            .onStart { _loadingMovieRecommendation.update { true } }
-            .onCompletion { _loadingMovieRecommendation.update { false } }
+            .onStart {
+                _movieUiState.update { movieUiState ->
+                    movieUiState.copy(isLoadingRecommendation = true)
+                }
+            }
+            .onCompletion {
+                _movieUiState.update { movieUiState ->
+                    movieUiState.copy(isLoadingRecommendation = false)
+                }
+            }
+            .onEach { recommendation ->
+                _movieUiState.update { movieUiState ->
+                    val movieRecommendationList =
+                        MapperMovieRecommendationFromSocketToUi.mapperFrom(recommendation)
+                    movieUiState.copy(movieRecommendations = movieRecommendationList)
+                }
+            }
+            .catch { e ->
+                _movieUiState.update { movieUiState ->
+                    val statusResponse = getApiError(e)
+                    movieUiState.copy(
+                        messageError = movieUiState.messageError
+                            .addMessage(statusResponse, TypeMovieDetailUi.RECOMMENDATIONS)
+                    )
+                }
+            }
     }
 
     private fun getSeriesCastResponse(movieId: Int): Flow<SeriesCastResponse> {
         return flow { emit(RetrofitUtils.apiService.getSeriesCastMovie(movieId)) }
-            .onStart { _loadingSeriesCast.update { true } }
-            .onCompletion { _loadingSeriesCast.update { false } }
+            .onStart {
+                _movieUiState.update { movieUiState ->
+                    movieUiState.copy(isLoadingSeriesCast = true)
+                }
+            }
+            .onCompletion {
+                _movieUiState.update { movieUiState ->
+                    movieUiState.copy(isLoadingSeriesCast = false)
+                }
+            }
+            .onEach { seriesCastResponse ->
+                _movieUiState.update { movieUiState ->
+                    val seriesCast =
+                        MapperSeriesCastFromSocketToUi.mapperFrom(seriesCastResponse)
+                    movieUiState.copy(seriesCast = seriesCast)
+                }
+            }
+            .catch { e ->
+                _movieUiState.update { movieUiState ->
+                    val statusResponse = getApiError(e)
+                    movieUiState.copy(
+                        messageError = movieUiState.messageError
+                            .addMessage(statusResponse, TypeMovieDetailUi.SERIES_CAST)
+                    )
+                }
+            }
     }
 
     fun getMovie(movieId: Int) {
-        viewModelScope.launch {
-            combine(
-                getMovieDetailResponse(movieId),
-                getMovieRecommendationResponse(movieId),
-                getSeriesCastResponse(movieId)
-            ) { movieDetail, movieRecommendation, seriesCast ->
-                val movieRecommendationList = movieRecommendation.results.map {
-                    MapperMovieRecommendationFromSocketToUi.mapperFrom(it)
-                }
-                val seriesCastList = MapperSeriesCastFromSocketToUi.mapperFrom(seriesCast)
-                MapperMovieDetailFromApiToUi.mapperFrom(
-                    movieDetail,
-                    movieRecommendationList,
-                    seriesCastList
-                )
-            }
-                .catch { e ->
-                    val statusResponse = getApiError(e)
-                    _messages.addMessage(statusResponse.statusMessage)
-                }
-                .collect { movieDetail ->
-                    _movieDetail.update { movieDetail }
-                }
-        }
+        merge(
+            getMovieDetailResponse(movieId),
+            getMovieRecommendationResponse(movieId),
+            getSeriesCastResponse(movieId)
+        ).launchIn(viewModelScope)
     }
 
     fun favorite(movieId: Int, isFavorite: Boolean) {
@@ -91,26 +154,36 @@ class MovieDetailViewModel : ViewModel() {
                 emit(RetrofitUtils.apiService.favorite(body = data))
             }
                 .onStart {
-                    _isLoadingFavorite.update { true }
+                    _movieUiState.update { movieUiState ->
+                        movieUiState.copy(isLoadingFavorite = true)
+                    }
                 }
                 .onCompletion {
-                    _isLoadingFavorite.update { false }
+                    _movieUiState.update { movieUiState ->
+                        movieUiState.copy(isLoadingFavorite = false)
+                    }
                 }
                 .catch { e ->
-                    val statusResponse = getApiError(e)
-                    _messages.addMessage(statusResponse.statusMessage)
+                    _movieUiState.update { movieUiState ->
+                        val statusResponse = getApiError(e)
+                        movieUiState.copy(
+                            messageError = movieUiState.messageError
+                                .addMessage(statusResponse, TypeMovieDetailUi.FAVORITE)
+                        )
+                    }
                 }
                 .collect {
-                    _movieDetail.update { movie ->
-                        movie?.copy(isFavorite = movie.isFavorite.not())
+                    _movieUiState.update { movie ->
+                        movie.copy(isFavorite = movie.isFavorite.not())
                     }
                 }
         }
     }
 
     fun setMessageShown(message: String) {
-        _messages.update { messages ->
-            messages.filterNot { it.message == message }
+        _movieUiState.update { uiState ->
+            uiState.copy(messageError = uiState.messageError.filterNot { it.message == message }
+                .toSet())
         }
     }
 

@@ -191,6 +191,12 @@
                     app:layout_constraintTop_toBottomOf="@id/tvOverviewLabel"
                     tools:text="@string/overview" />
 
+                <androidx.constraintlayout.widget.Group
+                    android:id="@+id/groupMovieDetail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:constraint_referenced_ids="cvIvPoster,tvStatusLanguage,tvSpokenLanguage,tvReleaseDate,tvGenres,tvRating,ratingBar,tvOverview,tvOverviewLabel" />
+
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/tvSeriesCastLabel"
                     android:layout_width="0dp"
@@ -211,6 +217,12 @@
                     app:layout_constraintTop_toBottomOf="@id/tvSeriesCastLabel"
                     tools:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                     tools:listitem="@layout/item_series_cast" />
+
+                <androidx.constraintlayout.widget.Group
+                    android:id="@+id/groupSeriesCast"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:constraint_referenced_ids="tvSeriesCastLabel,rcvSeriesCast,loadingSeriesCastProgress" />
 
                 <androidx.core.widget.ContentLoadingProgressBar
                     android:id="@+id/loadingSeriesCastProgress"
@@ -262,6 +274,12 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/tvRecommendationLabel" />
+
+                <androidx.constraintlayout.widget.Group
+                    android:id="@+id/groupRecommendation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:constraint_referenced_ids="tvRecommendationLabel,rcvRecommendation,loadingRecommendationProgress" />
 
                 <androidx.constraintlayout.widget.Barrier
                     android:layout_width="wrap_content"

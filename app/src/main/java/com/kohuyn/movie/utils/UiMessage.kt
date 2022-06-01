@@ -1,3 +1,7 @@
 package com.kohuyn.movie.utils
 
-data class UiMessage(val message: String)
+data class UiMessage<T>(
+    val message: String,
+    val code: Int = -1,
+    val type: T? = null
+)

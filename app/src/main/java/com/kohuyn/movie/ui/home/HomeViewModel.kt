@@ -18,8 +18,8 @@ class HomeViewModel : ViewModel() {
     private val _loading: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val loading: StateFlow<Boolean> get() = _loading
 
-    private val _messages: MutableStateFlow<List<UiMessage>> = MutableStateFlow(listOf())
-    val messages: StateFlow<List<UiMessage>> get() = _messages
+    private val _messages: MutableStateFlow<List<UiMessage<Unit>>> = MutableStateFlow(listOf())
+    val messages: StateFlow<List<UiMessage<Unit>>> get() = _messages
 
     fun loadPosters() {
         viewModelScope.launch {

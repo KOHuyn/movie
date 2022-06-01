@@ -14,7 +14,4 @@ data class MovieDetail(
     val releaseDate: String?,
     val genres: String?,
     @FloatRange(from = 0.0, to = 10.0) val rating: Float = 0.0f,
-    val movieRecommendations: List<MovieRecommendPreview> = emptyList(),
-    val seriesCast: List<Cast> = emptyList(),
-    val isFavorite: Boolean = false
 )

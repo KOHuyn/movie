@@ -7,11 +7,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.flowWithLifecycle
@@ -23,14 +23,18 @@ import com.bumptech.glide.Glide
 import com.google.android.material.appbar.AppBarLayout
 import com.kohuyn.movie.R
 import com.kohuyn.movie.databinding.FragmentMovieDetailBinding
+import com.kohuyn.movie.model.Cast
 import com.kohuyn.movie.model.MovieDetail
+import com.kohuyn.movie.model.MovieRecommendPreview
 import com.kohuyn.movie.ui.alert.MessageDialog
 import com.kohuyn.movie.ui.login.LoginDialog
 import com.kohuyn.movie.ui.movie.adapter.MovieCastAdapter
 import com.kohuyn.movie.ui.movie.adapter.MovieRecommendationAdapter
 import com.kohuyn.movie.utils.StorageCache
+import com.kohuyn.movie.utils.toast
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
 
@@ -118,17 +122,11 @@ class MovieDetailFragment : Fragment() {
         recommendationAdapter.onItemClick = { movieId ->
             navigateToMovieDetail(findNavController(), movieId)
         }
-        binding.toolbar.setNavigationOnClickListener { activity?.onBackPressed() }
+        binding.toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
         binding.fabFavorite.setOnClickListener {
             val favoriteClick = {
-                vm.movieDetail.value?.isFavorite?.not()?.let { isFavorite ->
+                vm.movieUiState.value.isFavorite.not().let { isFavorite ->
                     vm.favorite(movieId, isFavorite)
-                } ?: kotlin.run {
-                    Toast.makeText(
-                        requireContext(),
-                        "Some error,Pls retry",
-                        Toast.LENGTH_SHORT
-                    ).show()
                 }
             }
             if (StorageCache.token.isNullOrBlank()) {
@@ -145,63 +143,109 @@ class MovieDetailFragment : Fragment() {
 
     private fun observeViewModel() {
         lifecycleScope.launch {
-            vm.movieDetail
+            vm.movieUiState
+                .map { it.movieDetail }
+                .distinctUntilChanged()
                 .flowWithLifecycle(lifecycle)
-                .mapNotNull { it }
                 .collect { movie ->
                     bindMovie(movie)
                 }
         }
         lifecycleScope.launch {
-            vm.loading
+            vm.movieUiState
+                .map { it.movieRecommendations }
+                .distinctUntilChanged()
+                .flowWithLifecycle(lifecycle)
+                .collect { movieRecommendations ->
+                    bindRecommendation(movieRecommendations)
+                }
+        }
+        lifecycleScope.launch {
+            vm.movieUiState
+                .map { it.seriesCast }
+                .distinctUntilChanged()
+                .flowWithLifecycle(lifecycle)
+                .collect { seriesCast ->
+                    bindSeriesCast(seriesCast)
+                }
+        }
+        lifecycleScope.launch {
+            vm.movieUiState
+                .map { it.isFavorite }
+                .distinctUntilChanged()
+                .flowWithLifecycle(lifecycle)
+                .collect { isFavorite ->
+                    bindFavorite(isFavorite)
+                }
+        }
+        lifecycleScope.launch {
+            vm.movieUiState
+                .map { it.isLoadingMovieDetail }
+                .distinctUntilChanged()
+                .distinctUntilChanged()
                 .flowWithLifecycle(lifecycle)
                 .collect { isLoading ->
                     setLoading(isLoading)
                 }
         }
         lifecycleScope.launch {
-            vm.loadingSeriesCast
+            vm.movieUiState
+                .map { it.isLoadingSeriesCast }
+                .distinctUntilChanged()
                 .flowWithLifecycle(lifecycle)
                 .collect { isLoading ->
                     setLoadingSeriesCast(isLoading)
                 }
         }
         lifecycleScope.launch {
-            vm.loadingMovieRecommendation
+            vm.movieUiState
+                .map { it.isLoadingRecommendation }
+                .distinctUntilChanged()
                 .flowWithLifecycle(lifecycle)
                 .collect { isLoading ->
                     setLoadingRecommendation(isLoading)
                 }
         }
         lifecycleScope.launch {
-            vm.loadingFavorite
+            vm.movieUiState
+                .map { it.isLoadingFavorite }
+                .distinctUntilChanged()
                 .flowWithLifecycle(lifecycle)
                 .collect { isLoading ->
                     setLoadingFavorite(isLoading)
                 }
         }
         lifecycleScope.launch {
-            vm.messages
+            vm.movieUiState
+                .map { it.messageError }
+                .distinctUntilChanged()
                 .flowWithLifecycle(lifecycle)
                 .collect { messages ->
                     if (messages.isNotEmpty()) {
                         val messageShow = messages.first()
-                        MessageDialog.Builder()
-                            .setMessage(messageShow.message)
-                            .setButtonNegative { dialog -> dialog.dismiss() }
-                            .setButtonPositive(getString(R.string.retry)) { dialog ->
-                                dialog.dismiss()
-                                vm.getMovie(movieId)
-                            }
-                            .setOnDismissListener { vm.setMessageShown(messageShow.message) }
-                            .setCancelable(false)
-                            .build(childFragmentManager)
+                        if (messageShow.type == TypeMovieDetailUi.MOVIE) {
+                            MessageDialog.Builder()
+                                .setMessage(messageShow.message)
+                                .setButtonNegative { dialog -> dialog.dismiss() }
+                                .setButtonPositive(getString(R.string.back)) { dialog ->
+                                    dialog.dismiss()
+                                    findNavController().navigateUp()
+                                }
+                                .setOnDismissListener { vm.setMessageShown(messageShow.message) }
+                                .setCancelable(false)
+                                .build(childFragmentManager)
+                        } else {
+                            toast(messageShow.message)
+                            vm.setMessageShown(messageShow.message)
+                        }
                     }
                 }
         }
     }
 
-    private fun bindMovie(movie: MovieDetail) {
+    private fun bindMovie(movie: MovieDetail?) {
+        binding.groupMovieDetail.isGone = movie == null
+        if (movie == null) return
         Glide.with(this)
             .load(movie.backdropPath)
             .centerCrop()
@@ -220,26 +264,26 @@ class MovieDetailFragment : Fragment() {
         binding.tvRating.text = getString(R.string.rating_value, movie.voteCount?.toString())
         binding.ratingBar.rating = movie.rating
         binding.tvOverview.text = movie.overview
-        //series cast
-        movie.seriesCast.isNullOrEmpty().let { isEmpty ->
-            binding.tvSeriesCastLabel.isGone = isEmpty
-            binding.rcvSeriesCast.isGone = isEmpty
-        }
-        seriesCastAdapter.items = movie.seriesCast
-        //recommendation
-        movie.movieRecommendations.isNullOrEmpty().let { isEmpty ->
-            binding.tvRecommendationLabel.isGone = isEmpty
-            binding.rcvRecommendation.isGone = isEmpty
-        }
-        recommendationAdapter.items = movie.movieRecommendations
-        //favorite
+    }
+
+    private fun bindRecommendation(recommendation: List<MovieRecommendPreview>) {
+        binding.groupRecommendation.isGone = recommendation.isNullOrEmpty()
+        recommendationAdapter.items = recommendation
+    }
+
+    private fun bindSeriesCast(seriesCast: List<Cast>) {
+        binding.groupSeriesCast.isGone = seriesCast.isNullOrEmpty()
+        seriesCastAdapter.items = seriesCast
+    }
+
+    private fun bindFavorite(isFavorite: Boolean) {
         binding.fabFavorite.icon = ResourcesCompat.getDrawable(
             resources,
-            if (movie.isFavorite) R.drawable.ic_favorited else R.drawable.ic_favorite,
+            if (isFavorite) R.drawable.ic_favorited else R.drawable.ic_favorite,
             null
         )
         binding.fabFavorite.text =
-            getString(if (movie.isFavorite) R.string.un_favorite else R.string.favorite)
+            getString(if (isFavorite) R.string.un_favorite else R.string.favorite)
     }
 
     private fun setLoading(isLoading: Boolean) {
