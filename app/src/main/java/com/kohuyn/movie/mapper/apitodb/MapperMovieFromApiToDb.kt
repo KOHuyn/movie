@@ -4,7 +4,7 @@ import com.kohuyn.movie.mapper.base.Mapper
 import com.kohuyn.movie.model.entity.MovieEntity
 import com.kohuyn.movie.model.response.PostersResponse
 
-object MapperMovieFromDbToUi : Mapper<PostersResponse, List<MovieEntity>> {
+object MapperMovieFromApiToDb : Mapper<PostersResponse, List<MovieEntity>> {
     override fun mapperFrom(from: PostersResponse): List<MovieEntity> {
         return from.results.map { poster ->
             MovieEntity(

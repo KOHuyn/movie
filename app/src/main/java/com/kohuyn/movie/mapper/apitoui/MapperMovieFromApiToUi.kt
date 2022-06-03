@@ -5,22 +5,24 @@ import com.kohuyn.movie.model.Poster
 import com.kohuyn.movie.model.response.PostersResponse
 import com.kohuyn.movie.utils.MovieImageLoader
 
-object MapperMovieFromApiToUi : Mapper<PostersResponse.ItemPosterResponse, Poster> {
-    override fun mapperFrom(from: PostersResponse.ItemPosterResponse): Poster {
-        return Poster(
-            id = from.id ?: -1,
-            title = from.title ?: "-",
-            posterPath = MovieImageLoader.loadPoster(from.posterPath),
-            releaseDate = from.releaseDate,
-            adult = from.adult,
-            overview = from.overview,
-            originalTitle = from.originalTitle,
-            originalLanguage = from.originalLanguage,
-            backdropPath = from.backdropPath,
-            popularity = from.popularity ?: 0.0,
-            voteCount = from.voteCount ?: 0,
-            video = from.video ?: false,
-            votePercent = (from.voteAverage ?: 0.0).times(10).toInt()
-        )
+object MapperMovieFromApiToUi : Mapper<PostersResponse, List<Poster>> {
+    override fun mapperFrom(from: PostersResponse): List<Poster> {
+        return from.results.map { poster ->
+            Poster(
+                id = poster.id ?: -1,
+                title = poster.title ?: "-",
+                posterPath = MovieImageLoader.loadPoster(poster.posterPath),
+                releaseDate = poster.releaseDate,
+                adult = poster.adult,
+                overview = poster.overview,
+                originalTitle = poster.originalTitle,
+                originalLanguage = poster.originalLanguage,
+                backdropPath = poster.backdropPath,
+                popularity = poster.popularity ?: 0.0,
+                voteCount = poster.voteCount ?: 0,
+                video = poster.video ?: false,
+                votePercent = (poster.voteAverage ?: 0.0).times(10).toInt()
+            )
+        }
     }
 }

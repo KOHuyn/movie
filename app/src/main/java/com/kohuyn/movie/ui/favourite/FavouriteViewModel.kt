@@ -35,9 +35,7 @@ class FavouriteViewModel : ViewModel() {
                 }
                 .collect { posters ->
                     _posters.update {
-                        posters.results.map {
-                            MapperMovieFromApiToUi.mapperFrom(it)
-                        }
+                        MapperMovieFromApiToUi.mapperFrom(posters)
                     }
                 }
         }

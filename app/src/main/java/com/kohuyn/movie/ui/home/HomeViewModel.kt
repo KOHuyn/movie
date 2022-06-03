@@ -3,16 +3,17 @@ package com.kohuyn.movie.ui.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kohuyn.movie.db.RoomDbUtils
-import com.kohuyn.movie.mapper.apitodb.MapperMovieFromDbToUi
+import com.kohuyn.movie.mapper.apitodb.MapperMovieFromApiToDb
 import com.kohuyn.movie.mapper.apitoui.MapperMovieFromApiToUi
+import com.kohuyn.movie.mapper.dbtoui.MapperMovieFromDbToUi
 import com.kohuyn.movie.model.Poster
 import com.kohuyn.movie.network.RetrofitUtils
 import com.kohuyn.movie.utils.UiMessage
 import com.kohuyn.movie.utils.addMessage
 import com.kohuyn.movie.utils.getApiError
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class HomeViewModel : ViewModel() {
 
@@ -27,10 +28,31 @@ class HomeViewModel : ViewModel() {
     private val _messages: MutableStateFlow<List<UiMessage<Unit>>> = MutableStateFlow(listOf())
     val messages: StateFlow<List<UiMessage<Unit>>> get() = _messages
 
+    private fun getDiscoverApi(): Flow<List<Poster>> {
+        return flow {
+            emit(RetrofitUtils.apiService.getDiscoverMovie())
+        }
+            .onEach { response ->
+                val moviesDb = MapperMovieFromApiToDb.mapperFrom(response)
+                movieDao.insertAll(moviesDb)
+            }.map { MapperMovieFromApiToUi.mapperFrom(it) }
+            .onEach { Timber.d("getDiscoverApi") }
+    }
+
+    private fun getDiscoverDb(): Flow<List<Poster>> {
+        return flow { emit(movieDao.getAllMovie()) }
+            .map { MapperMovieFromDbToUi.mapperFrom(it) }
+            .onEach { Timber.d("getDiscoverDb") }
+    }
+
     fun loadPosters() {
         viewModelScope.launch {
-            flow {
-                emit(RetrofitUtils.apiService.getDiscoverMovie())
+            kotlin.run {
+                if (movieDao.getAllMovie().isNotEmpty()) {
+                    getDiscoverDb()
+                } else {
+                    getDiscoverApi()
+                }
             }
                 .onStart { _loading.update { true } }
                 .onCompletion { _loading.update { false } }
@@ -38,16 +60,8 @@ class HomeViewModel : ViewModel() {
                     val statusResponse = getApiError(e)
                     _messages.addMessage(statusResponse.statusMessage)
                 }
-                .onEach { response ->
-                    val moviesDb = MapperMovieFromDbToUi.mapperFrom(response)
-                    movieDao.insertAll(moviesDb)
-                }
                 .collect { posters ->
-                    _posters.update {
-                        posters.results.map {
-                            MapperMovieFromApiToUi.mapperFrom(it)
-                        }
-                    }
+                    _posters.update { posters }
                 }
         }
     }
